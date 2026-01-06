@@ -245,29 +245,33 @@
 
         // --- UPDATED LIKE LOGIC ---
         window.openYoutubeForLike = () => {
-            if(!currentVideoId) return alert("Video not loaded!");
-            // Opening the specific video being displayed
-            const ytUrl = `https://www.youtube.com/watch?v=${currentVideoId}`;
-            window.open(ytUrl, '_blank');
-            
-            const btn = document.getElementById('verify-btn');
-            btn.disabled = false; 
-            btn.classList.remove('opacity-50', 'cursor-not-allowed');
-            btn.classList.add('bg-green-600');
-        };
+    if(!currentVideoId) return alert("Video load nahi hui!");
 
-        window.verifyLike = async () => {
-            const btn = document.getElementById('verify-btn');
-            btn.innerText = "VERIFYING...";
-            setTimeout(async () => {
-                await updateDoc(doc(db, "users", currentUID), { Coins: increment(100) });
-                if(currentCampaignId) await updateDoc(doc(db, "campaigns", currentCampaignId), { count: increment(1) });
-                btn.innerText = "2. VERIFY (+100 🪙)";
-                refreshCoins(); 
-                alert("Verified! +100 Coins"); 
-                loadNextVideo();
-            }, 2000);
-        };
+    // 1. Pehle YouTube App kholne ki koshish karein (Android/iOS Intent)
+    const appUrl = `vnd.youtube:${currentVideoId}`;
+    const webUrl = `https://www.youtube.com/watch?v=${currentVideoId}`;
+
+    // Ek temporary link banakar click karwayenge
+    const a = document.createElement('a');
+    a.href = appUrl;
+    
+    // Check karein agar app khul sakti hai, nahi toh browser par fallback karein
+    window.location.href = appUrl;
+
+    // 500ms baad check karein, agar page nahi badla toh browser mein kholein
+    setTimeout(() => {
+        if (!document.hidden) {
+            window.open(webUrl, '_blank');
+        }
+    }, 500);
+
+    // Verify button activate karein
+    const btn = document.getElementById('verify-btn');
+    btn.disabled = false; 
+    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+    btn.classList.add('bg-green-600');
+};
+
 
         // --- TAB SWITCHING ---
         window.switchTab = (t) => {
