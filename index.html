@@ -247,23 +247,43 @@
         window.openYoutubeForLike = () => {
     if(!currentVideoId) return alert("Video load nahi hui!");
 
-    // 1. Pehle YouTube App kholne ki koshish karein (Android/iOS Intent)
-    const appUrl = `vnd.youtube:${currentVideoId}`;
     const webUrl = `https://www.youtube.com/watch?v=${currentVideoId}`;
+    const appUrl = `vnd.youtube:${currentVideoId}`;
+    const shortUrl = `https://youtu.be/${currentVideoId}`;
 
-    // Ek temporary link banakar click karwayenge
-    const a = document.createElement('a');
-    a.href = appUrl;
+    // Ek hidden link banakar click karenge (Ye zyada compatible hai)
+    const link = document.createElement('a');
     
-    // Check karein agar app khul sakti hai, nahi toh browser par fallback karein
-    window.location.href = appUrl;
+    // Android/iOS detection
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-    // 500ms baad check karein, agar page nahi badla toh browser mein kholein
-    setTimeout(() => {
-        if (!document.hidden) {
-            window.open(webUrl, '_blank');
-        }
-    }, 500);
+    if (isMobile) {
+        // Method 1: Try App Protocol
+        window.location.href = appUrl;
+        
+        // Method 2: Agar 500ms tak app nahi khuli, toh Short URL use karo
+        setTimeout(() => {
+            if (!document.hidden) {
+                window.location.href = shortUrl;
+            }
+        }, 500);
+        
+        // Method 3: Final fallback to browser
+        setTimeout(() => {
+            if (!document.hidden) {
+                window.open(webUrl, '_blank');
+            }
+        }, 1500);
+    } else {
+        window.open(webUrl, '_blank');
+    }
+
+    // Verify button enable karein
+    const btn = document.getElementById('verify-btn');
+    btn.disabled = false; 
+    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+    btn.classList.add('bg-green-600');
+};
 
     // Verify button activate karein
     const btn = document.getElementById('verify-btn');
